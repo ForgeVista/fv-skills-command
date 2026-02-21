@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicedoc/tauri-conf-schema/main/v2/tauri.conf.json",
+  "productName": "FV Skills Graph Viewer",
+  "version": "0.1.0",
+  "identifier": "com.forgevista.skills-viewer",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "FV Skills Graph Viewer",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; script-src 'self'"
+    }
+  },
+  "plugins": {
+    "fs": {
+      "scope": {
+        "allow": ["$HOME/**", "$APPDATA/**", "$DOCUMENT/**"],
+        "deny": ["$HOME/.ssh/**", "$HOME/.gnupg/**"]
+      }
+    }
+  }
+}

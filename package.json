@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "fv-skills-viewer",
+  "version": "0.1.0",
+  "description": "ForgeVista Skills Graph Viewer — Tauri v2 desktop app with Svelte frontend",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ForgeVista/fv-skills-viewer.git"
+  },
+  "license": "MIT"
+}

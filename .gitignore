@@ -1,0 +1,44 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+
+# Rust / Tauri
+src-tauri/target/
+*.pdb
+
+# Build output
+dist/
+build/
+
+# Test
+coverage/
+.nyc_output/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Temp
+tmp/
+*.tmp
+*.bak
+*.log
+
+# Beads (local task tracking)
+.beads/
