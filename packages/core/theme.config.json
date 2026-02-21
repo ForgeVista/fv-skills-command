@@ -1,0 +1,24 @@
+{
+  "app_name": "FV Skills Graph Viewer",
+  "logo": "assets/fv-logo.svg",
+  "colors": {
+    "bg_app": "#002336",
+    "bg_sidebar": "#001824",
+    "bg_surface": "#0d2d3d",
+    "primary": "#0076B6",
+    "accent": "#F7931A",
+    "selected": "#FFCC33",
+    "hover": "#66B2DD",
+    "warning": "#FF5722",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#B0B7BC",
+    "text_muted": "#708090",
+    "border": "#708090",
+    "ghost": "rgba(112,128,144,0.5)"
+  },
+  "font": {
+    "family": "JetBrains Mono, monospace",
+    "weight_body": 400,
+    "weight_heading": 700
+  }
+}
