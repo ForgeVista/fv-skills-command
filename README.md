@@ -26,8 +26,19 @@ npm run tauri dev
 - **Wiki-link navigation** — `[[skill-name]]` links resolve and navigate
 - **Cytoscape DAG** — visual graph of skill relationships
 - **DOF accordions** — Degrees of Freedom per step, toggleable chips
+- **In-place markdown editor** — click Edit, modify markdown, Save writes back to the original file
+- **Unsaved changes guard** — warns before switching skills with unsaved edits
 - **White-label theming** — full color/font/logo customization via `theme.config.json`
 - **Resilience** — malformed files silently skipped, circular links condensed
+
+## For Non-Developer Users
+
+1. Download and launch the app
+2. Click **Open Folder** and select a folder containing `.md` skill files
+3. Browse skills in the sidebar — click to view rendered content
+4. Click `[[wiki-links]]` to navigate between related skills
+5. Switch to **Graph** view to see the relationship diagram
+6. Click **Edit** on any skill to modify it, then **Save** to write changes to disk
 
 ## Documentation
 
