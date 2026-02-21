@@ -18,6 +18,24 @@ Command center for browsing, navigating, and editing agent skill files — wiki 
 | Graph | Cytoscape.js |
 | Font | JetBrains Mono |
 
+## Prerequisites
+
+**All platforms:**
+- [Node.js](https://nodejs.org/) 18+ and npm
+- [Rust](https://rustup.rs/) (stable toolchain)
+
+**Windows:**
+- [Microsoft C++ Build Tools 2022](https://visualstudio.microsoft.com/visual-cpp-build-tools/) — select "Desktop development with C++"
+- WebView2 — pre-installed on Windows 10/11; if missing, install from [Microsoft](https://developer.microsoft.com/en-us/microsoft-edge/webview2/)
+
+**macOS:**
+- Xcode Command Line Tools: `xcode-select --install`
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+```
+
 ## Quick Start
 
 ```bash
