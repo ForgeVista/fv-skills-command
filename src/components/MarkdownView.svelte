@@ -4,14 +4,36 @@
   import { invoke } from '@tauri-apps/api/core';
 
   let renderToken = 0;
-  $: selectedId = $store.selectedSkillId;
-  $: allSkills = $store.skills || [];
-  $: skill = allSkills.find((s) => s.id === selectedId);
   let renderedHtml = '';
   let isEditing = false;
   let editContent = '';
   let isSaving = false;
   let saveError = '';
+  let showSavedToast = false;
+  let savedTimer = null;
+  let activeId = $store.selectedSkillId;
+
+  $: allSkills = $store.skills || [];
+  $: storeSelectedId = $store.selectedSkillId;
+
+  // Intercept skill switch — check for unsaved changes
+  $: if (storeSelectedId !== activeId) {
+    if (isEditing && editContent !== (allSkills.find(s => s.id === activeId)?.body || '')) {
+      const discard = confirm('You have unsaved changes. Discard and switch?');
+      if (discard) {
+        isEditing = false;
+        saveError = '';
+        activeId = storeSelectedId;
+      } else {
+        store.selectSkill(activeId);
+      }
+    } else {
+      if (isEditing) isEditing = false;
+      activeId = storeSelectedId;
+    }
+  }
+
+  $: skill = allSkills.find((s) => s.id === activeId);
 
   $: {
     const currentToken = ++renderToken;
@@ -69,11 +91,8 @@
     saveError = '';
 
     try {
-      // Pass all commonly-used key variants to remain compatible across command signatures.
       await invoke('write_skill_file', {
-        path: skill.path,
         filePath: skill.path,
-        file_path: skill.path,
         content: editContent,
       });
 
@@ -89,6 +108,9 @@
       );
 
       isEditing = false;
+      showSavedToast = true;
+      if (savedTimer) clearTimeout(savedTimer);
+      savedTimer = setTimeout(() => { showSavedToast = false; }, 2000);
     } catch (error) {
       saveError = String(error || 'Save failed.');
     } finally {
@@ -137,6 +159,10 @@
       {@html renderedHtml}
     {/if}
   </div>
+
+  {#if showSavedToast}
+    <div class="saved-toast">Saved</div>
+  {/if}
 </section>
 
 <style>
@@ -147,6 +173,7 @@
     flex-direction: column;
     overflow: hidden;
     border-right: 1px solid var(--sv-color-border, #708090);
+    position: relative;
   }
 
   .markdown-header {
@@ -223,6 +250,27 @@
     margin-top: 8px;
     color: #ff6b6b;
     font-size: 12px;
+  }
+
+  .saved-toast {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: #f7931a;
+    color: #111111;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    animation: toast-fade 2s ease-in-out;
+    pointer-events: none;
+  }
+
+  @keyframes toast-fade {
+    0% { opacity: 0; transform: translateY(8px); }
+    15% { opacity: 1; transform: translateY(0); }
+    85% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-4px); }
   }
 
   .markdown-body :global(.wiki-link--resolved) {
