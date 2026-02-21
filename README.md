@@ -30,6 +30,31 @@ npm run tauri dev
 - **Unsaved changes guard** — warns before switching skills with unsaved edits
 - **White-label theming** — full color/font/logo customization via `theme.config.json`
 - **Resilience** — malformed files silently skipped, circular links condensed
+- **Change stream + diff viewer** — timeline of commits with click-to-open before/after diff modal
+
+## Change Tracking Setup (Technical)
+
+Use this when onboarding a new folder for change history.
+
+1. Initialize git once in the folder users will open:
+```bash
+cd /path/to/skills-folder
+git init
+```
+2. Launch this app and open that folder.
+3. Open **Change tracking settings** (gear icon) to review:
+   - tracking on/off
+   - commit interval
+   - excluded paths
+4. Start the autogit daemon for that folder:
+```bash
+cd /home/ubuntu/dev/fv-website
+npm run autogit:daemon -- --repo /path/to/skills-folder
+```
+
+Notes:
+- Auto-commits are written to local branch `autogit/tracking`.
+- The shadow branch is local-only and should never be pushed.
 
 ## For Non-Developer Users
 
@@ -39,6 +64,10 @@ npm run tauri dev
 4. Click `[[wiki-links]]` to navigate between related skills
 5. Switch to **Graph** view to see the relationship diagram
 6. Click **Edit** on any skill to modify it, then **Save** to write changes to disk
+7. Review **Change Stream** in the sidebar to see recent updates (for example, `5m ago`)
+8. Click a change, then click a file to open **Diff Viewer** and compare before/after content
+
+If you see `Change tracking unavailable (no git repo found)`, ask your administrator to run `git init` in the selected folder.
 
 ## Documentation
 

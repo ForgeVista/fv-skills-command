@@ -217,12 +217,12 @@ pub async fn write_skill_file(file_path: String, content: String) -> Result<Stri
     }
 
     // Must be a .md file
-    let ext = path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("");
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
     if ext != "md" {
-        return Err(format!("Refusing to write non-markdown file: {}", file_path));
+        return Err(format!(
+            "Refusing to write non-markdown file: {}",
+            file_path
+        ));
     }
 
     std::fs::write(path, &content).map_err(|e| format!("Write failed: {}", e))?;

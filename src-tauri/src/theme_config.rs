@@ -5,7 +5,10 @@ const THEME_FILE_NAME: &str = "theme.config.json";
 
 #[tauri::command]
 pub async fn save_theme_config(app: AppHandle, theme: Value) -> Result<String, String> {
-    let app_data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?;
     std::fs::create_dir_all(&app_data_dir).map_err(|error| error.to_string())?;
 
     let target_path = app_data_dir.join(THEME_FILE_NAME);
@@ -17,7 +20,10 @@ pub async fn save_theme_config(app: AppHandle, theme: Value) -> Result<String, S
 
 #[tauri::command]
 pub async fn load_theme_config(app: AppHandle) -> Result<Option<Value>, String> {
-    let app_data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?;
     let target_path = app_data_dir.join(THEME_FILE_NAME);
 
     if !target_path.exists() {
