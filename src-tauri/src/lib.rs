@@ -10,6 +10,7 @@ pub fn run() {
             fs_scan::scan_folder,
             fs_scan::scan_folder_index,
             fs_scan::read_skill_file,
+            fs_scan::write_skill_file,
             graph_builder::build_graph,
             theme_config::save_theme_config,
             theme_config::load_theme_config,

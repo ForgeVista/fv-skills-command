@@ -205,6 +205,31 @@ pub async fn scan_folder_index(folder_path: String) -> Result<IndexResult, Strin
     })
 }
 
+/// Write updated markdown content back to a skill file on disk.
+/// Security: only overwrites existing .md files — no arbitrary file creation.
+#[tauri::command]
+pub async fn write_skill_file(file_path: String, content: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+
+    // Must be an existing file
+    if !path.is_file() {
+        return Err(format!("Not a file: {}", file_path));
+    }
+
+    // Must be a .md file
+    let ext = path
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("");
+    if ext != "md" {
+        return Err(format!("Refusing to write non-markdown file: {}", file_path));
+    }
+
+    std::fs::write(path, &content).map_err(|e| format!("Write failed: {}", e))?;
+
+    Ok(file_path)
+}
+
 /// Stage 2: On-demand body parse for a single file (called when user selects a skill).
 #[tauri::command]
 pub async fn read_skill_file(file_path: String) -> Result<SkillEntry, String> {
