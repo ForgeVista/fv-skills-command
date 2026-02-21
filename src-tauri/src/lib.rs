@@ -1,7 +1,6 @@
 mod fs_scan;
 mod graph_builder;
-
-use tauri::Manager;
+mod theme_config;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -9,8 +8,11 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
             fs_scan::scan_folder,
+            fs_scan::scan_folder_index,
             fs_scan::read_skill_file,
             graph_builder::build_graph,
+            theme_config::save_theme_config,
+            theme_config::load_theme_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
