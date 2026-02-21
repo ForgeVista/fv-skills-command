@@ -1,6 +1,16 @@
-import { basename } from 'node:path';
-
 export const GHOST_PREFIX = 'unresolved:';
+
+function pathBasename(value = '') {
+  const raw = String(value ?? '');
+  if (!raw) return '';
+  const normalized = raw.replace(/\\/g, '/');
+  const parts = normalized.split('/');
+  return parts[parts.length - 1] || '';
+}
+
+function stripExtension(filename = '') {
+  return String(filename).replace(/\.[^.]+$/, '');
+}
 
 function normalizeDashSeparated(value) {
   return String(value ?? '')
@@ -17,8 +27,7 @@ function normalizeName(value) {
 }
 
 function safeFileStem(filePath = '') {
-  const name = basename(String(filePath));
-  return name.replace(/\.[^.]+$/, '');
+  return stripExtension(pathBasename(filePath));
 }
 
 function toCanonicalEntry(raw) {
