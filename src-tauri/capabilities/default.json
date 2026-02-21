@@ -1,6 +1,6 @@
 {
   "identifier": "default",
-  "description": "Default capabilities for the Skills Graph Viewer",
+  "description": "Default capabilities for FV Skills Command",
   "windows": ["main"],
   "permissions": [
     "core:default",

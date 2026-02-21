@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    fv_skills_viewer_lib::run();
+    fv_skills_command_lib::run();
 }

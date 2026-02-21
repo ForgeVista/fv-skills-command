@@ -1,4 +1,4 @@
-# Contributing to FV Skills Graph Viewer
+# Contributing to FV Skills Command
 
 ## Development Setup
 

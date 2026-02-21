@@ -1,6 +1,11 @@
-# FV Skills Graph Viewer
+# FV Skills Command
 
-Desktop application for browsing and navigating agent skill files as a wiki + directed acyclic graph.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tauri v2](https://img.shields.io/badge/Tauri-v2-blue.svg)](https://v2.tauri.app/)
+[![Svelte](https://img.shields.io/badge/Svelte-5-orange.svg)](https://svelte.dev/)
+[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](package.json)
+
+Command center for browsing, navigating, and editing agent skill files — wiki navigation, directed acyclic graph, and change tracking in one desktop app.
 
 ## Stack
 
@@ -48,13 +53,14 @@ git init
    - excluded paths
 4. Start the autogit daemon for that folder:
 ```bash
-cd /home/ubuntu/dev/fv-website
+cd /path/to/fv-skills-command
 npm run autogit:daemon -- --repo /path/to/skills-folder
 ```
 
 Notes:
 - Auto-commits are written to local branch `autogit/tracking`.
 - The shadow branch is local-only and should never be pushed.
+- `git init` is only required once per folder.
 
 ## For Non-Developer Users
 
@@ -69,9 +75,12 @@ Notes:
 
 If you see `Change tracking unavailable (no git repo found)`, ask your administrator to run `git init` in the selected folder.
 
+Note: the desktop app refreshes from local file events automatically; there is no manual Sync button.
+
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
+- [Architecture](docs/architecture.md)
 - [Theming Guide](docs/theming-guide.md)
 - [Developer Guide](docs/developer-guide.md)
 

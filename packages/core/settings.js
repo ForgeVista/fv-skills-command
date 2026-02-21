@@ -1,6 +1,6 @@
 import { FV_DEFAULTS, injectTheme, resolveTheme } from './theme.js';
 
-export const THEME_STORAGE_KEY = 'fv.skills-viewer.theme';
+export const THEME_STORAGE_KEY = 'fv.skills-command.theme';
 
 /**
  * Clone defaults to avoid accidental mutation.

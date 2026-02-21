@@ -62,7 +62,7 @@ export function resolveTheme(userConfig) {
 
 /**
  * Convert a resolved theme into a flat map of CSS custom property names → values.
- * Names use the `--sv-` prefix (skills-viewer) to avoid collisions.
+ * Names use the `--sc-` prefix (skills-viewer) to avoid collisions.
  */
 export function themeToCssProperties(theme) {
   const t = theme || FV_DEFAULTS;
@@ -72,16 +72,16 @@ export function themeToCssProperties(theme) {
   if (t.colors) {
     for (const key of COLOR_KEYS) {
       if (t.colors[key] != null) {
-        props[`--sv-color-${key.replace(/_/g, '-')}`] = t.colors[key];
+        props[`--sc-color-${key.replace(/_/g, '-')}`] = t.colors[key];
       }
     }
   }
 
   // Font
   if (t.font) {
-    if (t.font.family) props['--sv-font-family'] = t.font.family;
-    if (t.font.weight_body) props['--sv-font-weight-body'] = String(t.font.weight_body);
-    if (t.font.weight_heading) props['--sv-font-weight-heading'] = String(t.font.weight_heading);
+    if (t.font.family) props['--sc-font-family'] = t.font.family;
+    if (t.font.weight_body) props['--sc-font-weight-body'] = String(t.font.weight_body);
+    if (t.font.weight_heading) props['--sc-font-weight-heading'] = String(t.font.weight_heading);
   }
 
   return props;
