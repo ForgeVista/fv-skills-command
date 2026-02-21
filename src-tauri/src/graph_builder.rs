@@ -84,11 +84,7 @@ pub async fn build_graph(skills: Vec<SkillEntry>) -> Result<SkillGraph, String> 
         nodes.push(GraphNode {
             id: id.clone(),
             label: skill.name.clone(),
-            node_type: if is_moc {
-                "moc".to_string()
-            } else {
-                node_type
-            },
+            node_type: if is_moc { "moc".to_string() } else { node_type },
             category: get_str(fm, "category"),
             status: get_str(fm, "status"),
             is_moc,

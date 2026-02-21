@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicedoc/tauri-conf-schema/main/v2/tauri.conf.json",
-  "productName": "FV Skills Graph Viewer",
+  "productName": "FV Skills Command",
   "version": "0.1.0",
-  "identifier": "com.forgevista.skills-viewer",
+  "identifier": "com.forgevista.skills-command",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "FV Skills Graph Viewer",
+        "title": "FV Skills Command",
         "width": 1400,
         "height": 900,
         "minWidth": 800,

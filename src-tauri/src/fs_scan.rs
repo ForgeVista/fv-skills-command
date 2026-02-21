@@ -121,6 +121,116 @@ pub async fn scan_folder(folder_path: String) -> Result<ScanResult, String> {
     })
 }
 
+/// Stage 1: Lightweight index pass — frontmatter only, no body parsing.
+/// Returns minimal skill entries for fast sidebar population and graph building.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SkillIndex {
+    pub path: String,
+    pub name: String,
+    pub frontmatter: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IndexResult {
+    pub skills: Vec<SkillIndex>,
+    pub skipped: usize,
+    pub errors: usize,
+}
+
+#[tauri::command]
+pub async fn scan_folder_index(folder_path: String) -> Result<IndexResult, String> {
+    let path = Path::new(&folder_path);
+    if !path.is_dir() {
+        return Err(format!("Not a directory: {}", folder_path));
+    }
+
+    let mut skills = Vec::new();
+    let mut skipped = 0usize;
+    let mut errors = 0usize;
+
+    for entry in WalkDir::new(path).follow_links(true).into_iter() {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_) => {
+                errors += 1;
+                continue;
+            }
+        };
+
+        if !entry.file_type().is_file() {
+            continue;
+        }
+
+        let file_path = entry.path();
+        let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("");
+        if ext != "md" {
+            skipped += 1;
+            continue;
+        }
+
+        // Read only enough to extract frontmatter (first ~4KB is usually sufficient)
+        let content = match std::fs::read_to_string(file_path) {
+            Ok(c) => c,
+            Err(_) => {
+                errors += 1;
+                continue;
+            }
+        };
+
+        let (frontmatter, _body) = extract_frontmatter(&content);
+
+        if frontmatter.is_none() {
+            skipped += 1;
+            continue;
+        }
+
+        let file_stem = file_path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("unknown");
+
+        let name = derive_name(&frontmatter, file_stem);
+
+        skills.push(SkillIndex {
+            path: file_path.to_string_lossy().to_string(),
+            name,
+            frontmatter,
+        });
+    }
+
+    Ok(IndexResult {
+        skills,
+        skipped,
+        errors,
+    })
+}
+
+/// Write updated markdown content back to a skill file on disk.
+/// Security: only overwrites existing .md files — no arbitrary file creation.
+#[tauri::command]
+pub async fn write_skill_file(file_path: String, content: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+
+    // Must be an existing file
+    if !path.is_file() {
+        return Err(format!("Not a file: {}", file_path));
+    }
+
+    // Must be a .md file
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
+    if ext != "md" {
+        return Err(format!(
+            "Refusing to write non-markdown file: {}",
+            file_path
+        ));
+    }
+
+    std::fs::write(path, &content).map_err(|e| format!("Write failed: {}", e))?;
+
+    Ok(file_path)
+}
+
+/// Stage 2: On-demand body parse for a single file (called when user selects a skill).
 #[tauri::command]
 pub async fn read_skill_file(file_path: String) -> Result<SkillEntry, String> {
     let path = Path::new(&file_path);

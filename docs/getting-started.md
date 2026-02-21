@@ -2,7 +2,7 @@
 title: Getting Started
 ---
 
-# Getting Started with FV Skills Graph Viewer
+# Getting Started with FV Skills Command
 
 ## Prerequisites
 

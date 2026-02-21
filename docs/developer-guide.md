@@ -7,7 +7,7 @@ title: Developer Guide
 ## Architecture
 
 ```
-fv-skills-viewer/
+fv-skills-command/
 ├── src-tauri/           # Rust backend (Tauri v2)
 │   ├── src/
 │   │   ├── main.rs      # Desktop entry point

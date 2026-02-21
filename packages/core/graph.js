@@ -1,4 +1,3 @@
-import { basename } from 'node:path';
 import { createWikiLinkResolver, GHOST_PREFIX, normalizeSkillId } from './resolver.js';
 import { themeToGraphColors, FV_DEFAULTS } from './theme.js';
 
@@ -15,6 +14,18 @@ export const TYPE_TO_SHAPE = {
   unresolved: 'round-rectangle',
   cycle: 'round-rectangle',
 };
+
+function pathBasename(value = '') {
+  const raw = String(value ?? '');
+  if (!raw) return '';
+  const normalized = raw.replace(/\\/g, '/');
+  const parts = normalized.split('/');
+  return parts[parts.length - 1] || '';
+}
+
+function stripExtension(filename = '') {
+  return String(filename).replace(/\.[^.]+$/, '');
+}
 
 const TYPE_TO_COLOR = {
   skill: FV_COLORS.primary,
@@ -46,7 +57,7 @@ function normalizeType(rawType, moc) {
 }
 
 function deriveSkillId(raw) {
-  return normalizeSkillId(raw.id || raw.name || raw.slug || raw.fileStem || basename(raw.file || raw.path || ''));
+  return normalizeSkillId(raw.id || raw.name || raw.slug || raw.fileStem || pathBasename(raw.file || raw.path || ''));
 }
 
 function deriveLabel(raw, id) {
@@ -140,7 +151,7 @@ function parseSkillInput(rawSkills) {
       status: raw.status || null,
       file: raw.file || null,
       path: raw.path || null,
-      fileStem: raw.fileStem || basename(raw.file || raw.path || '').replace(/\.[^.]+$/, ''),
+      fileStem: raw.fileStem || stripExtension(pathBasename(raw.file || raw.path || '')),
       related: normalizeArray(raw.related),
       scripts: normalizeArray(raw.scripts),
       wikiLinks: normalizeArray(raw.wikiLinks),
@@ -204,7 +215,7 @@ function nodeFromScript(scriptPath) {
   const id = scriptNodeId(scriptPath);
   return {
     id,
-    label: basename(String(scriptPath)),
+    label: pathBasename(scriptPath),
     type: 'script',
     shape: TYPE_TO_SHAPE.script,
     color: TYPE_TO_COLOR.script,

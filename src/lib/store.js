@@ -2,7 +2,7 @@ import { writable, derived } from 'svelte/store';
 
 function createStore() {
   const { subscribe, update, set } = writable({
-    appName: 'FV Skills Graph Viewer',
+    appName: 'FV Skills Command',
     skills: [],
     selectedSkillId: null,
     searchQuery: '',

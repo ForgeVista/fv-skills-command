@@ -1,4 +1,6 @@
 <script>
+  import { createEventDispatcher } from 'svelte';
+  import ChangeStreamSidebar from './ChangeStreamSidebar.svelte';
   import { store } from '../lib/store.js';
 
   const TYPE_ICONS = {
@@ -10,6 +12,8 @@
     script: '\u{1F4DC}',
   };
 
+  const dispatch = createEventDispatcher();
+
   $: skills = $store.skills || [];
   $: query = ($store.searchQuery || '').toLowerCase();
   $: filters = $store.typeFilters;
@@ -19,6 +23,10 @@
     if (filters.size > 0 && !filters.has(s.type || 'skill')) return false;
     return true;
   });
+
+  function handleOpenDiff(event) {
+    dispatch('openDiff', event.detail);
+  }
 </script>
 
 <aside class="sidebar">
@@ -27,22 +35,26 @@
     <span class="skill-count">{filtered.length}</span>
   </div>
 
-  <nav class="skill-list">
-    {#each filtered as skill (skill.id)}
-      <button
-        class="skill-item"
-        class:active={$store.selectedSkillId === skill.id}
-        class:deprecated={skill.status === 'deprecated'}
-        on:click={() => store.selectSkill(skill.id)}
-      >
-        <span class="skill-icon">{TYPE_ICONS[skill.type] || TYPE_ICONS.skill}</span>
-        <span class="skill-name">{skill.name}</span>
-        {#if skill.status === 'beta'}
-          <span class="badge badge-beta">beta</span>
-        {/if}
-      </button>
-    {/each}
-  </nav>
+  <div class="sidebar-sections">
+    <nav class="skill-list">
+      {#each filtered as skill (skill.id)}
+        <button
+          class="skill-item"
+          class:active={$store.selectedSkillId === skill.id}
+          class:deprecated={skill.status === 'deprecated'}
+          on:click={() => store.selectSkill(skill.id)}
+        >
+          <span class="skill-icon">{TYPE_ICONS[skill.type] || TYPE_ICONS.skill}</span>
+          <span class="skill-name">{skill.name}</span>
+          {#if skill.status === 'beta'}
+            <span class="badge badge-beta">beta</span>
+          {/if}
+        </button>
+      {/each}
+    </nav>
+
+    <ChangeStreamSidebar on:openDiff={handleOpenDiff} />
+  </div>
 </aside>
 
 <style>
@@ -55,6 +67,13 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  .sidebar-sections {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
   }
 
   .sidebar-header {
@@ -77,6 +96,7 @@
 
   .skill-list {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding: 4px 0;
   }

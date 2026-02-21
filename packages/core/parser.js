@@ -1,4 +1,3 @@
-import { basename } from 'node:path';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkFrontmatter from 'remark-frontmatter';
@@ -26,9 +25,20 @@ function normalizeName(value) {
   return String(value ?? '').trim();
 }
 
+function pathBasename(value = '') {
+  const raw = String(value ?? '');
+  if (!raw) return '';
+  const normalized = raw.replace(/\\/g, '/');
+  const parts = normalized.split('/');
+  return parts[parts.length - 1] || '';
+}
+
+function stripExtension(filename = '') {
+  return String(filename).replace(/\.[^.]+$/, '');
+}
+
 function safeFileStem(filePath = '') {
-  const name = basename(String(filePath));
-  return name.replace(/\.[^.]+$/, '');
+  return stripExtension(pathBasename(filePath));
 }
 
 function withTrailingSlash(base) {

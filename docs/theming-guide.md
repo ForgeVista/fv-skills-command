@@ -4,7 +4,7 @@ title: Theming Guide
 
 # Theming Guide
 
-The Skills Graph Viewer supports full white-label theming via `theme.config.json`.
+The FV Skills Command supports full white-label theming via `theme.config.json`.
 
 ## Theme Configuration
 
