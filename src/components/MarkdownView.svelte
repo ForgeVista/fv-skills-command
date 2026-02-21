@@ -1,4 +1,5 @@
 <script>
+  import { onDestroy } from 'svelte';
   import { store } from '../lib/store.js';
   import { parseMarkdown } from '../../packages/core/parser.js';
   import { invoke } from '@tauri-apps/api/core';
@@ -12,6 +13,10 @@
   let showSavedToast = false;
   let savedTimer = null;
   let activeId = $store.selectedSkillId;
+
+  onDestroy(() => {
+    if (savedTimer) clearTimeout(savedTimer);
+  });
 
   $: allSkills = $store.skills || [];
   $: storeSelectedId = $store.selectedSkillId;
@@ -62,12 +67,14 @@
     if (!skill) return;
     editContent = skill.body || '';
     saveError = '';
+    showSavedToast = false;
     isEditing = true;
   }
 
   function cancelEditing() {
     isEditing = false;
     saveError = '';
+    showSavedToast = false;
     editContent = skill?.body || '';
   }
 
@@ -96,23 +103,33 @@
         content: editContent,
       });
 
-      store.setSkills(
-        allSkills.map((entry) =>
-          entry.id === skill.id
-            ? {
-                ...entry,
-                body: editContent,
-              }
-            : entry
-        )
+      const updatedSkills = allSkills.map((entry) =>
+        entry.id === skill.id
+          ? {
+              ...entry,
+              body: editContent,
+            }
+          : entry
       );
+
+      store.setSkills(updatedSkills);
+
+      const currentToken = ++renderToken;
+      const rerendered = await parseMarkdown(editContent, { skills: updatedSkills });
+      if (currentToken === renderToken) {
+        renderedHtml = rerendered.html || '<p class="empty-state">No content.</p>';
+      }
 
       isEditing = false;
       showSavedToast = true;
       if (savedTimer) clearTimeout(savedTimer);
-      savedTimer = setTimeout(() => { showSavedToast = false; }, 2000);
+      savedTimer = setTimeout(() => {
+        showSavedToast = false;
+      }, 2000);
     } catch (error) {
+      // Stay in edit mode so user can fix and retry.
       saveError = String(error || 'Save failed.');
+      showSavedToast = false;
     } finally {
       isSaving = false;
     }
