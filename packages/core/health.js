@@ -188,11 +188,11 @@ const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---/;
 async function checkGit(adapter) {
   const isRepo = await adapter.isGitRepo();
   if (isRepo) {
-    return createCheckResult('git', 'pass', 'Git repository detected.');
+    return createCheckResult('git', 'pass', 'Version history is available for this folder.');
   }
   return createCheckResult('git', 'fail',
-    'No .git directory found. Initialize a git repo to enable version tracking.',
-    { ctaUrl: CTA_URL },
+    'This folder is not set up for version tracking. Initialize Git to see your change history and diffs.',
+    { ctaUrl: CTA_URL, ctaText: 'Get started with Git' },
   );
 }
 
@@ -204,11 +204,11 @@ async function checkGit(adapter) {
 async function checkAutogit(adapter) {
   const hasTracking = await adapter.hasAutogitTracking();
   if (hasTracking) {
-    return createCheckResult('autogit', 'pass', 'Autogit tracking branch found.');
+    return createCheckResult('autogit', 'pass', 'Automatic change tracking is active.');
   }
   return createCheckResult('autogit', 'warn',
-    'No autogit tracking branch. Enable autogit for automatic change history.',
-    { ctaUrl: CTA_URL },
+    'Automatic change tracking is not set up. Enable autogit in the desktop app to record every edit without manual commits.',
+    { ctaUrl: CTA_URL, ctaText: 'Enable autogit' },
   );
 }
 
@@ -221,13 +221,13 @@ async function checkSkillsCount(adapter) {
   const count = await adapter.skillFileCount();
   if (count > 0) {
     return createCheckResult('skills-count', 'pass',
-      `${count} skill file${count === 1 ? '' : 's'} found.`,
+      `${count} skill${count === 1 ? '' : 's'} indexed and ready to view.`,
       { count },
     );
   }
   return createCheckResult('skills-count', 'fail',
-    'No skill files (.md) found in this directory.',
-    { count: 0, ctaUrl: CTA_URL },
+    'No skill files found. Add Markdown files (.md) with a skill frontmatter block to get started.',
+    { count: 0, ctaUrl: CTA_URL, ctaText: 'Skill file format' },
   );
 }
 
@@ -304,12 +304,12 @@ async function checkWikiLinks(adapter, mdFiles) {
 
   if (broken.length === 0) {
     return createCheckResult('wiki-links', 'pass',
-      'All wiki links resolve to existing skills.',
+      'All skill references link to valid targets.',
     );
   }
   return createCheckResult('wiki-links', 'warn',
-    `${broken.length} broken wiki link${broken.length === 1 ? '' : 's'} found.`,
-    { broken },
+    `${broken.length} skill reference${broken.length === 1 ? '' : 's'} point${broken.length === 1 ? 's' : ''} to missing targets. Check the linked skill names for typos.`,
+    { broken, ctaUrl: CTA_URL, ctaText: 'Wiki link syntax' },
   );
 }
 
@@ -321,7 +321,7 @@ async function checkWikiLinks(adapter, mdFiles) {
 function checkDof(mdFiles) {
   const skillFiles = mdFiles.filter((f) => hasSkillFrontmatter(f.content));
   if (skillFiles.length === 0) {
-    return createCheckResult('dof', 'pass', 'No skill files to check for DOF sections.');
+    return createCheckResult('dof', 'pass', 'No skill files to check for completeness.');
   }
 
   const missing = [];
@@ -333,12 +333,12 @@ function checkDof(mdFiles) {
 
   if (missing.length === 0) {
     return createCheckResult('dof', 'pass',
-      'All skill files contain DOF sections.',
+      'All skills include Description, Output, or Format sections.',
     );
   }
   return createCheckResult('dof', 'warn',
-    `${missing.length} skill file${missing.length === 1 ? '' : 's'} missing DOF sections (Description/Output/Format).`,
-    { missing },
+    `${missing.length} skill${missing.length === 1 ? '' : 's'} missing a Description, Output, or Format section. Adding these improves discoverability.`,
+    { missing, ctaUrl: CTA_URL, ctaText: 'Skill file structure' },
   );
 }
 
@@ -352,11 +352,18 @@ function checkHelpers(mdFiles) {
   const skills = mdFiles.filter((f) => hasSkillFrontmatter(f.content));
 
   if (skills.length === 0) {
-    return createCheckResult('helpers', 'pass', 'No skill files to assess helpers against.');
+    return createCheckResult('helpers', 'pass', 'No skills to check for supporting files.');
+  }
+
+  if (helpers.length === 0) {
+    return createCheckResult('helpers', 'pass',
+      `${skills.length} skill${skills.length === 1 ? '' : 's'} found with no extra reference files.`,
+      { helperCount: 0, skillCount: skills.length },
+    );
   }
 
   return createCheckResult('helpers', 'pass',
-    `${helpers.length} helper file${helpers.length === 1 ? '' : 's'} alongside ${skills.length} skill${skills.length === 1 ? '' : 's'}.`,
+    `${helpers.length} reference file${helpers.length === 1 ? '' : 's'} supporting ${skills.length} skill${skills.length === 1 ? '' : 's'}.`,
     { helperCount: helpers.length, skillCount: skills.length },
   );
 }
