@@ -77,11 +77,19 @@ export function createTauriAdapter(rootPath, deps = {}) {
 
     async isGitRepo() {
       try {
-        const fs = await getFs();
-        const sep = rootPath.includes('\\') ? '\\' : '/';
-        return await fs.exists(rootPath + sep + '.git');
+        // Prefer Tauri invoke — walks parent directories, handles submodules.
+        const invoke = await getInvoke();
+        const info = await invoke('detect_git_repo', { entryPath: rootPath });
+        return info.is_git_repo === true;
       } catch {
-        return false;
+        // Fallback to plugin-fs direct check.
+        try {
+          const fs = await getFs();
+          const sep = rootPath.includes('\\') ? '\\' : '/';
+          return await fs.exists(rootPath + sep + '.git');
+        } catch {
+          return false;
+        }
       }
     },
 
