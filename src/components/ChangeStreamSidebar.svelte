@@ -10,12 +10,14 @@
   let commits = [];
   let loading = false;
   let isGitRepo = true;
+  let isUnbornRepo = false;
+  let hasCommitHistory = false;
   let error = '';
   let unlistenFileChanged = null;
   let expandedSha = null;
 
   // Expose git state to parent so the main panel can show context-aware empty states.
-  $: dispatch('gitState', { trackedPath, isGitRepo, loading, error, commitCount: commits.length });
+  $: dispatch('gitState', { trackedPath, isGitRepo, isUnbornRepo, hasCommitHistory, loading, error, commitCount: commits.length });
 
   $: nextPath = $store.folderPath || '';
   $: if (nextPath && nextPath !== trackedPath) {
@@ -70,15 +72,30 @@
         limit: 150,
       });
 
-      isGitRepo = Boolean(result?.is_git_repo ?? result?.isGitRepo);
-      commits = (result?.commits || []).map((commit) => ({
+      const isGitRepoRaw = result?.is_git_repo ?? result?.isGitRepo;
+      const isUnbornRepoRaw = result?.is_unborn_repo ?? result?.isUnbornRepo;
+      const hasCommitHistoryRaw = result?.has_commit_history ?? result?.hasCommitHistory;
+      const commitEntries = result?.commits || [];
+
+      isGitRepo = Boolean(isGitRepoRaw);
+      commits = commitEntries.map((commit) => ({
         ...commit,
         files_changed: commit.files_changed || commit.filesChanged || [],
         relativeLabel: toRelativeTime(commit.timestamp),
       }));
+
+      hasCommitHistory = typeof hasCommitHistoryRaw === 'boolean'
+        ? hasCommitHistoryRaw
+        : commits.length > 0;
+
+      isUnbornRepo = typeof isUnbornRepoRaw === 'boolean'
+        ? isUnbornRepoRaw
+        : (isGitRepo && !hasCommitHistory && commits.length === 0);
     } catch (loadError) {
       error = String(loadError || 'Failed to load commit history.');
       commits = [];
+      isUnbornRepo = false;
+      hasCommitHistory = false;
     }
   }
 
@@ -133,10 +150,22 @@
       <p class="empty-heading">No git repository</p>
       <p class="empty-hint">Run <code>git init</code> in your skills folder to enable change tracking.</p>
     </div>
+  {:else if isUnbornRepo}
+    <div class="stream-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon"><path d="M12 2v20"/><path d="M4 7h8"/><path d="M4 17h16"/></svg>
+      <p class="empty-heading">Repository has no commits yet</p>
+      <p class="empty-hint">Create your first commit to initialize history, then changes will appear here.</p>
+    </div>
   {:else if loading}
     <div class="stream-state">Loading changes...</div>
   {:else if error}
     <div class="stream-state stream-error">{error}</div>
+  {:else if commits.length === 0 && hasCommitHistory}
+    <div class="stream-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon"><path d="M3 12h18"/><path d="M6 8h12"/><path d="M9 16h6"/></svg>
+      <p class="empty-heading">No tracked history yet</p>
+      <p class="empty-hint">Start the autogit daemon or make a new commit to populate the Git tab timeline.</p>
+    </div>
   {:else if commits.length === 0}
     <div class="stream-empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
