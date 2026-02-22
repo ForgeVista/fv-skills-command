@@ -7,6 +7,7 @@
   import GraphView from './components/GraphView.svelte';
   import DiffViewer from './components/DiffViewer.svelte';
   import SettingsPanel from './components/SettingsPanel.svelte';
+  import SettingsTab from './components/SettingsTab.svelte';
   import ChangeStreamSidebar from './components/ChangeStreamSidebar.svelte';
   import { store } from './lib/store.js';
 
@@ -111,14 +112,14 @@
     <div class="main-content" role="tabpanel" id="panel-{activeTab}">
       {#if activeTab === 'graph'}
         <div class="panel-graph">
-          <Sidebar on:openDiff={handleOpenDiff} />
+          <Sidebar mode="graph" on:openDiff={handleOpenDiff} />
           <div class="graph-main">
             <GraphView />
           </div>
         </div>
       {:else if activeTab === 'files'}
         <div class="panel-files">
-          <Sidebar on:openDiff={handleOpenDiff} />
+          <Sidebar mode="files" />
           <MarkdownView />
           <DetailPanel />
         </div>
@@ -145,11 +146,7 @@
         </div>
       {:else if activeTab === 'settings'}
         <div class="panel-settings">
-          <SettingsPanel
-            open={true}
-            repoRoot={repoPath}
-            on:close={() => store.setActiveTab('graph')}
-          />
+          <SettingsTab repoRoot={repoPath} />
         </div>
       {/if}
     </div>
