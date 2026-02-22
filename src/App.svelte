@@ -24,6 +24,13 @@
     filePath: null,
   };
 
+  // Git tab state from ChangeStreamSidebar — drives main panel empty states.
+  let gitState = { trackedPath: '', isGitRepo: true, loading: false, error: '', commitCount: 0 };
+
+  function handleGitState(event) {
+    gitState = event.detail;
+  }
+
   onMount(() => {
     let unlisten = null;
 
@@ -127,6 +134,7 @@
         <div class="panel-git">
           <ChangeStreamSidebar
             on:openDiff={handleOpenDiff}
+            on:gitState={handleGitState}
           />
           <div class="git-main">
             {#if diffViewer.open}
@@ -137,6 +145,24 @@
                 filePath={diffViewer.filePath}
                 on:close={closeDiffViewer}
               />
+            {:else if !gitState.trackedPath}
+              <div class="git-empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="git-empty-icon"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                <p class="git-empty-heading">No folder open</p>
+                <p class="git-empty-text">Open a skills folder to browse its commit history and diffs.</p>
+              </div>
+            {:else if !gitState.isGitRepo}
+              <div class="git-empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="git-empty-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p class="git-empty-heading">Unborn repository</p>
+                <p class="git-empty-text">This folder has no git repository. Run <code>git init</code> in your skills folder to enable change tracking and diff viewing.</p>
+              </div>
+            {:else if gitState.commitCount === 0}
+              <div class="git-empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="git-empty-icon"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
+                <p class="git-empty-heading">No commit history</p>
+                <p class="git-empty-text">The repository has no commits yet. Start the autogit daemon or make a manual commit to see diffs here.</p>
+              </div>
             {:else}
               <div class="placeholder">
                 <p class="placeholder-text">Select a commit to view its diff.</p>
@@ -350,5 +376,49 @@
   .placeholder-text {
     color: #666666;
     font-size: 14px;
+  }
+
+  /* ── Git Tab Empty States ──────────────────────────────── */
+
+  .git-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex: 1;
+    background: #0D0D0D;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .git-empty-icon {
+    width: 48px;
+    height: 48px;
+    color: #333333;
+  }
+
+  .git-empty-heading {
+    color: #AAAAAA;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .git-empty-text {
+    color: #666666;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 360px;
+  }
+
+  .git-empty-text code {
+    background: rgba(247, 147, 26, 0.12);
+    border-radius: 3px;
+    color: #F7931A;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 2px 6px;
   }
 </style>
