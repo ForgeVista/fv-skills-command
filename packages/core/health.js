@@ -304,12 +304,12 @@ async function checkWikiLinks(adapter, mdFiles) {
 
   if (broken.length === 0) {
     return createCheckResult('wiki-links', 'pass',
-      'All skill references link to valid targets.',
+      'All skill cross-references point to valid targets.',
     );
   }
   return createCheckResult('wiki-links', 'warn',
-    `${broken.length} skill reference${broken.length === 1 ? '' : 's'} point${broken.length === 1 ? 's' : ''} to missing targets. Check the linked skill names for typos.`,
-    { broken, ctaUrl: CTA_URL, ctaText: 'Wiki link syntax' },
+    `${broken.length} cross-reference${broken.length === 1 ? '' : 's'} point${broken.length === 1 ? 's' : ''} to skills that don\u2019t exist yet. Check for typos in the linked names.`,
+    { broken, ctaUrl: CTA_URL, ctaText: 'Fix broken links' },
   );
 }
 
@@ -321,7 +321,7 @@ async function checkWikiLinks(adapter, mdFiles) {
 function checkDof(mdFiles) {
   const skillFiles = mdFiles.filter((f) => hasSkillFrontmatter(f.content));
   if (skillFiles.length === 0) {
-    return createCheckResult('dof', 'pass', 'No skill files to check for completeness.');
+    return createCheckResult('dof', 'pass', 'No skill files to check for structure.');
   }
 
   const missing = [];
@@ -333,12 +333,12 @@ function checkDof(mdFiles) {
 
   if (missing.length === 0) {
     return createCheckResult('dof', 'pass',
-      'All skills include Description, Output, or Format sections.',
+      'Every skill has a Description, Output, or Format section.',
     );
   }
   return createCheckResult('dof', 'warn',
-    `${missing.length} skill${missing.length === 1 ? '' : 's'} missing a Description, Output, or Format section. Adding these improves discoverability.`,
-    { missing, ctaUrl: CTA_URL, ctaText: 'Skill file structure' },
+    `${missing.length} skill${missing.length === 1 ? ' is' : 's are'} missing a Description, Output, or Format heading. Adding one makes the skill easier to understand at a glance.`,
+    { missing, ctaUrl: CTA_URL, ctaText: 'Add structure sections' },
   );
 }
 
@@ -352,18 +352,18 @@ function checkHelpers(mdFiles) {
   const skills = mdFiles.filter((f) => hasSkillFrontmatter(f.content));
 
   if (skills.length === 0) {
-    return createCheckResult('helpers', 'pass', 'No skills to check for supporting files.');
+    return createCheckResult('helpers', 'pass', 'No skills found yet — supporting files will be checked once you add skills.');
   }
 
   if (helpers.length === 0) {
     return createCheckResult('helpers', 'pass',
-      `${skills.length} skill${skills.length === 1 ? '' : 's'} found with no extra reference files.`,
+      `${skills.length} skill${skills.length === 1 ? '' : 's'} found. No additional reference files detected.`,
       { helperCount: 0, skillCount: skills.length },
     );
   }
 
   return createCheckResult('helpers', 'pass',
-    `${helpers.length} reference file${helpers.length === 1 ? '' : 's'} supporting ${skills.length} skill${skills.length === 1 ? '' : 's'}.`,
+    `${helpers.length} supporting reference file${helpers.length === 1 ? '' : 's'} alongside ${skills.length} skill${skills.length === 1 ? '' : 's'}.`,
     { helperCount: helpers.length, skillCount: skills.length },
   );
 }
