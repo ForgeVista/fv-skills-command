@@ -12,11 +12,27 @@
   import { store } from './lib/store.js';
 
   const TABS = [
-    { id: 'graph',    label: 'Graph',    icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
-    { id: 'files',    label: 'Files',    icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6' },
-    { id: 'git',      label: 'Git',      icon: 'M6 3v12 M18 9a3 3 0 100-6 3 3 0 000 6z M6 21a3 3 0 100-6 3 3 0 000 6z M18 9a9 9 0 01-9 9' },
-    { id: 'settings', label: 'Settings', icon: 'M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z M12 8a4 4 0 100 8 4 4 0 000-8z' },
+    { id: 'graph',    label: 'Graph',    key: '1', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
+    { id: 'files',    label: 'Files',    key: '2', icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6' },
+    { id: 'git',      label: 'Git',      key: '3', icon: 'M6 3v12 M18 9a3 3 0 100-6 3 3 0 000 6z M6 21a3 3 0 100-6 3 3 0 000 6z M18 9a9 9 0 01-9 9' },
+    { id: 'settings', label: 'Settings', key: '4', icon: 'M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z M12 8a4 4 0 100 8 4 4 0 000-8z' },
   ];
+
+  /** Map digit keys to tab IDs for Cmd/Ctrl+1..4 shortcuts. */
+  const KEY_TO_TAB = { '1': 'graph', '2': 'files', '3': 'git', '4': 'settings' };
+
+  /** Detect macOS for shortcut label (Cmd vs Ctrl). */
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+  const modLabel = isMac ? '\u2318' : 'Ctrl+';
+
+  function handleKeydown(event) {
+    if (!(event.metaKey || event.ctrlKey)) return;
+    const tabId = KEY_TO_TAB[event.key];
+    if (tabId) {
+      event.preventDefault();
+      store.setActiveTab(tabId);
+    }
+  }
 
   let diffViewer = {
     open: false,
@@ -76,6 +92,8 @@
   }
 </script>
 
+<svelte:window on:keydown={handleKeydown} />
+
 <main class="app" data-theme="dark">
   <!-- Header -->
   <header class="app-header">
@@ -105,7 +123,7 @@
           role="tab"
           aria-selected={activeTab === tab.id}
           aria-controls="panel-{tab.id}"
-          title={tab.label}
+          title="{tab.label} ({modLabel}{tab.key})"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon">
             <path d={tab.icon} />
