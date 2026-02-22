@@ -8,6 +8,7 @@
   import DiffViewer from './components/DiffViewer.svelte';
   import SettingsPanel from './components/SettingsPanel.svelte';
   import SettingsTab from './components/SettingsTab.svelte';
+  import FileTree from './components/FileTree.svelte';
   import ChangeStreamSidebar from './components/ChangeStreamSidebar.svelte';
   import { store } from './lib/store.js';
 
@@ -144,7 +145,7 @@
         </div>
       {:else if activeTab === 'files'}
         <div class="panel-files">
-          <Sidebar mode="files" />
+          <FileTree />
           <MarkdownView />
           <DetailPanel />
         </div>
