@@ -171,15 +171,37 @@
               </div>
             {:else if !gitState.isGitRepo}
               <div class="git-empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="git-empty-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <p class="git-empty-heading">Unborn repository</p>
-                <p class="git-empty-text">This folder has no git repository. Run <code>git init</code> in your skills folder to enable change tracking and diff viewing.</p>
+                <!-- Git branch icon — signals "version control" context -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="git-empty-icon" aria-hidden="true">
+                  <circle cx="18" cy="5" r="3"/>
+                  <circle cx="6" cy="12" r="3"/>
+                  <circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                <p class="git-empty-heading">This folder is not a git repository</p>
+                <p class="git-empty-text">
+                  Git history tracking lets you see changes to your skills over time.
+                </p>
+                <p class="git-empty-hint">
+                  Run <code>git init</code> in your skills folder to start tracking changes.
+                </p>
               </div>
             {:else if gitState.commitCount === 0}
               <div class="git-empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="git-empty-icon"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
-                <p class="git-empty-heading">No commit history</p>
-                <p class="git-empty-text">The repository has no commits yet. Start the autogit daemon or make a manual commit to see diffs here.</p>
+                <!-- Timeline / commit node icon — signals "empty history" -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="git-empty-icon" aria-hidden="true">
+                  <line x1="6" y1="3" x2="6" y2="21"/>
+                  <circle cx="6" cy="12" r="3" fill="#F7931A" stroke="#F7931A"/>
+                  <line x1="6" y1="12" x2="14" y2="12"/>
+                  <line x1="14" y1="8" x2="14" y2="16"/>
+                  <polyline points="11 5 14 8 17 5"/>
+                  <polyline points="11 19 14 16 17 19"/>
+                </svg>
+                <p class="git-empty-heading">No commits yet</p>
+                <p class="git-empty-text">
+                  Start by creating your first skill file, then commit it to begin tracking history.
+                </p>
               </div>
             {:else}
               <div class="placeholder">
@@ -411,14 +433,15 @@
   }
 
   .git-empty-icon {
-    width: 48px;
-    height: 48px;
-    color: #333333;
+    width: 52px;
+    height: 52px;
+    color: #444444;
+    margin-bottom: 4px;
   }
 
   .git-empty-heading {
-    color: #AAAAAA;
-    font-size: 16px;
+    color: #CCCCCC;
+    font-size: 15px;
     font-weight: 600;
     margin: 0;
   }
@@ -428,7 +451,28 @@
     font-size: 13px;
     line-height: 1.6;
     margin: 0;
-    max-width: 360px;
+    max-width: 380px;
+  }
+
+  .git-empty-hint {
+    color: #555555;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 380px;
+    padding: 10px 14px;
+    background: rgba(247, 147, 26, 0.06);
+    border: 1px solid rgba(247, 147, 26, 0.18);
+    border-radius: 6px;
+  }
+
+  .git-empty-hint code {
+    background: rgba(247, 147, 26, 0.15);
+    border-radius: 3px;
+    color: #F7931A;
+    font-family: inherit;
+    font-size: 12px;
+    padding: 1px 5px;
   }
 
   .git-empty-text code {
