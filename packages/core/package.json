@@ -10,6 +10,7 @@
     "./health": "./health.js",
     "./health-adapter": "./health-adapter.js",
     "./fsa-adapter": "./fsa-adapter.js",
-    "./git-browser": "./git-browser.js"
+    "./git-browser": "./git-browser.js",
+    "./tauri-adapter": "./tauri-adapter.js"
   }
 }

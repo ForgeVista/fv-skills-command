@@ -17,6 +17,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@forgevista/skills-core": "*",
     "rehype-highlight": "^7.0.2",
     "rehype-sanitize": "^6.0.0",
     "rehype-stringify": "^10.0.1",
