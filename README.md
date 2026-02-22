@@ -95,6 +95,40 @@ If you see `Change tracking unavailable (no git repo found)`, ask your administr
 
 Note: the desktop app refreshes from local file events automatically; there is no manual Sync button.
 
+## Web Viewer
+
+Don't want to install anything? Use the web viewer at [forgevista.ai/tools/skills-command](https://forgevista.ai/tools/skills-command).
+
+**Requirements:** Chrome or Edge (the web viewer uses the File System Access API, which is not yet available in Firefox or Safari).
+
+### How to sync your skills
+
+1. Open [forgevista.ai/tools/skills-command](https://forgevista.ai/tools/skills-command) in Chrome or Edge
+2. Click **Sync Folder** and select your skills directory
+3. Grant read access when prompted — your files stay on your machine and are never uploaded
+4. Browse skills, view the graph, and check your change history
+
+The web viewer re-reads your folder each time you click Sync. To see new changes, click Sync again.
+
+### Web vs Desktop
+
+| Feature | Web Viewer | Desktop App |
+|---------|-----------|-------------|
+| Browse & search skills | Yes | Yes |
+| Graph visualization | Yes | Yes |
+| Git log & diff viewer | Yes | Yes |
+| Health checks | Yes | Yes |
+| In-place editing | No | Yes |
+| White-label theming | No | Yes |
+| Real-time file watching | No | Yes |
+| Autogit daemon | No | Yes |
+| Works offline | No | Yes |
+| Browser requirement | Chrome/Edge | Any (native window) |
+
+**Privacy guarantee:** The web viewer runs entirely in your browser. Your skills never leave your machine — there is zero server-side data access.
+
+For the full editing experience, [download the desktop app](https://github.com/ForgeVista/fv-skills-command/releases).
+
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
