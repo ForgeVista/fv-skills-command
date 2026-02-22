@@ -12,6 +12,38 @@
 
 import { createFsaFs } from './fsa-adapter.js';
 
+// ── Capability detection ────────────────────────────────────────────
+
+/**
+ * Check whether the current environment supports browser git operations.
+ * Requires: File System Access API (showDirectoryPicker, FileSystemDirectoryHandle).
+ *
+ * @returns {boolean}
+ */
+export function isSupported() {
+  return (
+    typeof globalThis !== 'undefined' &&
+    typeof globalThis.FileSystemDirectoryHandle === 'function' &&
+    typeof globalThis.showDirectoryPicker === 'function'
+  );
+}
+
+/**
+ * Assert that the environment supports browser git. Throws if not.
+ *
+ * @throws {Error} with code 'UNSUPPORTED_MODE' when FSA is unavailable
+ */
+export function assertSupported() {
+  if (!isSupported()) {
+    const err = new Error(
+      'Browser git requires the File System Access API (Chrome or Edge). ' +
+      'This feature is not available in Firefox, Safari, or server-side environments.',
+    );
+    err.code = 'UNSUPPORTED_MODE';
+    throw err;
+  }
+}
+
 /**
  * @typedef {object} CommitEntry
  * @property {string} oid    — full SHA
