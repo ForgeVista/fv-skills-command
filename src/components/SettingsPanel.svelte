@@ -6,8 +6,9 @@
   Tauri commands. The running daemon hot-reloads exclude and enabled changes.
 -->
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
+  import { runDesktopHealthChecks } from '../lib/desktop-health.js';
 
   export let open = false;
   export let repoRoot = '';
@@ -22,6 +23,10 @@
   let saving = false;
   let saveError = '';
   let loadError = '';
+  let healthLoading = false;
+  let healthError = '';
+  let healthReport = null;
+  let loadedRepoRoot = '';
 
   // Interval slider steps (seconds)
   const INTERVAL_STEPS = [
@@ -32,8 +37,14 @@
   let intervalStep = 1; // index into INTERVAL_STEPS
 
   // ---- load config when panel opens ----
-  $: if (open && repoRoot) {
+  $: if (open && repoRoot && repoRoot !== loadedRepoRoot) {
+    loadedRepoRoot = repoRoot;
     loadConfig();
+    loadHealthReport();
+  }
+
+  $: if (!open) {
+    loadedRepoRoot = '';
   }
 
   async function loadConfig() {
@@ -51,6 +62,20 @@
       intervalStep = closest;
     } catch (err) {
       loadError = `Failed to load config: ${err?.message ?? err}`;
+    }
+  }
+
+  async function loadHealthReport() {
+    healthLoading = true;
+    healthError = '';
+    healthReport = null;
+
+    try {
+      healthReport = await runDesktopHealthChecks(repoRoot);
+    } catch (err) {
+      healthError = `Failed to run health checks: ${err?.message ?? err}`;
+    } finally {
+      healthLoading = false;
     }
   }
 
@@ -119,6 +144,26 @@
     {/if}
 
     <div class="panel-body">
+      <!-- Readiness check -->
+      <div class="field">
+        <div class="field-label">
+          <span>Repository readiness</span>
+          <button class="refresh-link" on:click={loadHealthReport} disabled={healthLoading || !repoRoot}>
+            {healthLoading ? 'Checking…' : 'Recheck'}
+          </button>
+        </div>
+        {#if healthError}
+          <p class="field-hint field-error">{healthError}</p>
+        {:else if healthLoading}
+          <p class="field-hint">Running readiness checks...</p>
+        {:else if healthReport}
+          <span class="health-pill health-{healthReport.overall}">
+            {healthReport.overall === 'pass' ? 'Ready' : healthReport.overall === 'warn' ? 'Needs attention' : 'Action required'}
+          </span>
+          <p class="field-hint">{healthReport.results.length} checks completed for this folder.</p>
+        {/if}
+      </div>
+
       <!-- Enabled toggle -->
       <div class="field">
         <label class="field-label" for="autogit-enabled">Enable change tracking</label>
@@ -291,10 +336,58 @@
     font-size: 12px;
   }
 
+  .refresh-link {
+    background: none;
+    border: none;
+    color: #F7931A;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  .refresh-link:disabled {
+    color: #7e6a4d;
+    cursor: default;
+    text-decoration: none;
+  }
+
   .field-hint {
     font-size: 11px;
     color: var(--sv-color-text-muted, #708090);
     margin: 0;
+  }
+
+  .field-error {
+    color: #f88;
+  }
+
+  .health-pill {
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    width: fit-content;
+  }
+
+  .health-pass {
+    background: rgba(52, 199, 89, 0.2);
+    border: 1px solid rgba(52, 199, 89, 0.5);
+    color: #75f2a1;
+  }
+
+  .health-warn {
+    background: rgba(247, 147, 26, 0.2);
+    border: 1px solid rgba(247, 147, 26, 0.45);
+    color: #ffc375;
+  }
+
+  .health-fail {
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid rgba(255, 107, 107, 0.45);
+    color: #ff9a9a;
   }
 
   /* Toggle */

@@ -1,0 +1,16 @@
+{
+  "name": "@forgevista/skills-core",
+  "version": "0.2.0",
+  "description": "Shared browser-safe core modules for FV Skills Command surfaces.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./health": "./health.js",
+    "./health-adapter": "./health-adapter.js",
+    "./fsa-adapter": "./fsa-adapter.js",
+    "./git-browser": "./git-browser.js",
+    "./tauri-adapter": "./tauri-adapter.js"
+  }
+}

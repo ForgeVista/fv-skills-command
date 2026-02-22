@@ -1,6 +1,8 @@
 {
   "name": "fv-skills-command",
   "version": "0.1.0",
+  "private": true,
+  "type": "module",
   "description": "FV Skills Command — desktop command center for agent skill files. Wiki navigation, DAG graph, and change tracking via Tauri v2 + Svelte.",
   "workspaces": [
     "packages/*"
@@ -17,6 +19,9 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@forgevista/skills-core": "*",
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-fs": "^2.4.5",
     "rehype-highlight": "^7.0.2",
     "rehype-sanitize": "^6.0.0",
     "rehype-stringify": "^10.0.1",
@@ -26,5 +31,11 @@
     "remark-wiki-link": "^2.0.1",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@tauri-apps/cli": "^2.10.0",
+    "svelte": "^4.2.20",
+    "vite": "^5.4.21"
   }
 }

@@ -49,6 +49,10 @@ pub struct DiffResult {
 pub struct LogResult {
     /// False when no `.git` was found above the given path.
     pub is_git_repo: bool,
+    /// True when repository exists but has no commits yet (`HEAD` is unborn).
+    pub is_unborn_repo: bool,
+    /// True when repository has at least one commit reachable from `HEAD`.
+    pub has_commit_history: bool,
     pub commits: Vec<CommitInfo>,
 }
 
@@ -71,6 +75,24 @@ pub fn git_log(repo_path: String, subtree_path: Option<String>, limit: Option<us
     if !root.join(".git").is_dir() {
         return LogResult {
             is_git_repo: false,
+            is_unborn_repo: false,
+            has_commit_history: false,
+            commits: vec![],
+        };
+    }
+
+    let has_commit_history = Command::new("git")
+        .current_dir(&root)
+        .args(["rev-parse", "--verify", "HEAD"])
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false);
+
+    if !has_commit_history {
+        return LogResult {
+            is_git_repo: true,
+            is_unborn_repo: true,
+            has_commit_history: false,
             commits: vec![],
         };
     }
@@ -105,6 +127,8 @@ pub fn git_log(repo_path: String, subtree_path: Option<String>, limit: Option<us
             eprintln!("[git_log] command error: {e}");
             return LogResult {
                 is_git_repo: true,
+                is_unborn_repo: false,
+                has_commit_history,
                 commits: vec![],
             };
         }
@@ -114,6 +138,8 @@ pub fn git_log(repo_path: String, subtree_path: Option<String>, limit: Option<us
         // autogit/tracking may not exist yet
         return LogResult {
             is_git_repo: true,
+            is_unborn_repo: false,
+            has_commit_history,
             commits: vec![],
         };
     }
@@ -123,6 +149,8 @@ pub fn git_log(repo_path: String, subtree_path: Option<String>, limit: Option<us
 
     LogResult {
         is_git_repo: true,
+        is_unborn_repo: false,
+        has_commit_history,
         commits,
     }
 }
