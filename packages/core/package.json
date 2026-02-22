@@ -8,6 +8,7 @@
   "exports": {
     ".": "./index.js",
     "./health": "./health.js",
+    "./health-adapter": "./health-adapter.js",
     "./git-browser": "./git-browser.js"
   }
 }
