@@ -171,3 +171,222 @@ export function buildHealthReport(results, options = {}) {
     duration: Math.max(0, now - startTime),
   };
 }
+
+// ── Health check rule implementations ─────────────────────────────
+
+const CTA_URL = 'https://github.com/ForgeVista/fv-skills-command';
+
+const WIKILINK_RE = /\[\[([^\]]+)\]\]/g;
+const DOF_HEADING_RE = /^#{1,3}\s+(Description|Output|Format)\b/im;
+const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---/;
+
+/**
+ * Rule 1: git — is .git directory present?
+ * @param {import('./health-adapter.js').HealthInputAdapter} adapter
+ * @returns {Promise<HealthCheckResult>}
+ */
+async function checkGit(adapter) {
+  const isRepo = await adapter.isGitRepo();
+  if (isRepo) {
+    return createCheckResult('git', 'pass', 'Git repository detected.');
+  }
+  return createCheckResult('git', 'fail',
+    'No .git directory found. Initialize a git repo to enable version tracking.',
+    { ctaUrl: CTA_URL },
+  );
+}
+
+/**
+ * Rule 2: autogit — is autogit/tracking branch present?
+ * @param {import('./health-adapter.js').HealthInputAdapter} adapter
+ * @returns {Promise<HealthCheckResult>}
+ */
+async function checkAutogit(adapter) {
+  const hasTracking = await adapter.hasAutogitTracking();
+  if (hasTracking) {
+    return createCheckResult('autogit', 'pass', 'Autogit tracking branch found.');
+  }
+  return createCheckResult('autogit', 'warn',
+    'No autogit tracking branch. Enable autogit for automatic change history.',
+    { ctaUrl: CTA_URL },
+  );
+}
+
+/**
+ * Rule 3: skills-count — are there any skill .md files?
+ * @param {import('./health-adapter.js').HealthInputAdapter} adapter
+ * @returns {Promise<HealthCheckResult>}
+ */
+async function checkSkillsCount(adapter) {
+  const count = await adapter.skillFileCount();
+  if (count > 0) {
+    return createCheckResult('skills-count', 'pass',
+      `${count} skill file${count === 1 ? '' : 's'} found.`,
+      { count },
+    );
+  }
+  return createCheckResult('skills-count', 'fail',
+    'No skill files (.md) found in this directory.',
+    { count: 0, ctaUrl: CTA_URL },
+  );
+}
+
+/**
+ * Recursively collect .md file paths and contents via adapter.
+ * @param {import('./health-adapter.js').HealthInputAdapter} adapter
+ * @returns {Promise<Array<{path: string, content: string}>>}
+ */
+async function collectMarkdownFiles(adapter) {
+  const files = [];
+
+  async function walk(dir) {
+    const entries = await adapter.listDir(dir);
+    for (const name of entries) {
+      if (name.startsWith('.')) continue;
+      const path = dir ? `${dir}/${name}` : name;
+      if (name.endsWith('.md')) {
+        const content = await adapter.readFile(path);
+        if (content !== null) {
+          files.push({ path, content });
+        }
+      } else {
+        // Try as directory — listDir returns [] if not a directory
+        const sub = await adapter.listDir(path);
+        if (sub.length > 0) {
+          await walk(path);
+        }
+      }
+    }
+  }
+
+  await walk('');
+  return files;
+}
+
+/**
+ * Check if file content has YAML frontmatter with a 'name' field (skill schema).
+ * @param {string} content
+ * @returns {boolean}
+ */
+function hasSkillFrontmatter(content) {
+  const match = content.match(FRONTMATTER_RE);
+  if (!match) return false;
+  // Check for 'name:' field in frontmatter
+  return /^name\s*:/m.test(match[1]);
+}
+
+/**
+ * Rule 4: wiki-links — do files contain [[wikilinks]] and do they resolve?
+ * @param {import('./health-adapter.js').HealthInputAdapter} adapter
+ * @param {Array<{path: string, content: string}>} mdFiles
+ * @returns {Promise<HealthCheckResult>}
+ */
+async function checkWikiLinks(adapter, mdFiles) {
+  const skillFiles = mdFiles.filter((f) => hasSkillFrontmatter(f.content));
+  const skillNames = new Set(skillFiles.map((f) => {
+    const match = f.content.match(FRONTMATTER_RE);
+    if (!match) return '';
+    const nameMatch = match[1].match(/^name\s*:\s*(.+)$/m);
+    return nameMatch ? nameMatch[1].trim().replace(/^["']|["']$/g, '') : '';
+  }).filter(Boolean));
+
+  const broken = [];
+  for (const file of mdFiles) {
+    let match;
+    WIKILINK_RE.lastIndex = 0;
+    while ((match = WIKILINK_RE.exec(file.content)) !== null) {
+      const target = match[1].trim();
+      if (!skillNames.has(target)) {
+        broken.push({ file: file.path, target });
+      }
+    }
+  }
+
+  if (broken.length === 0) {
+    return createCheckResult('wiki-links', 'pass',
+      'All wiki links resolve to existing skills.',
+    );
+  }
+  return createCheckResult('wiki-links', 'warn',
+    `${broken.length} broken wiki link${broken.length === 1 ? '' : 's'} found.`,
+    { broken },
+  );
+}
+
+/**
+ * Rule 5: dof — do skill files have Description, Output, Format sections?
+ * @param {Array<{path: string, content: string}>} mdFiles
+ * @returns {HealthCheckResult}
+ */
+function checkDof(mdFiles) {
+  const skillFiles = mdFiles.filter((f) => hasSkillFrontmatter(f.content));
+  if (skillFiles.length === 0) {
+    return createCheckResult('dof', 'pass', 'No skill files to check for DOF sections.');
+  }
+
+  const missing = [];
+  for (const file of skillFiles) {
+    if (!DOF_HEADING_RE.test(file.content)) {
+      missing.push(file.path);
+    }
+  }
+
+  if (missing.length === 0) {
+    return createCheckResult('dof', 'pass',
+      'All skill files contain DOF sections.',
+    );
+  }
+  return createCheckResult('dof', 'warn',
+    `${missing.length} skill file${missing.length === 1 ? '' : 's'} missing DOF sections (Description/Output/Format).`,
+    { missing },
+  );
+}
+
+/**
+ * Rule 6: helpers — count non-skill .md files (helper/reference docs).
+ * @param {Array<{path: string, content: string}>} mdFiles
+ * @returns {HealthCheckResult}
+ */
+function checkHelpers(mdFiles) {
+  const helpers = mdFiles.filter((f) => !hasSkillFrontmatter(f.content));
+  const skills = mdFiles.filter((f) => hasSkillFrontmatter(f.content));
+
+  if (skills.length === 0) {
+    return createCheckResult('helpers', 'pass', 'No skill files to assess helpers against.');
+  }
+
+  return createCheckResult('helpers', 'pass',
+    `${helpers.length} helper file${helpers.length === 1 ? '' : 's'} alongside ${skills.length} skill${skills.length === 1 ? '' : 's'}.`,
+    { helperCount: helpers.length, skillCount: skills.length },
+  );
+}
+
+/**
+ * Run all 6 health checks against a HealthInputAdapter.
+ *
+ * @param {import('./health-adapter.js').HealthInputAdapter} adapter
+ * @returns {Promise<HealthReport>}
+ */
+export async function runHealthChecks(adapter) {
+  const startTime = Date.now();
+
+  // Run file-independent checks first
+  const [gitResult, autogitResult, skillsCountResult] = await Promise.all([
+    checkGit(adapter),
+    checkAutogit(adapter),
+    checkSkillsCount(adapter),
+  ]);
+
+  // Collect all .md files once for content-based checks
+  const mdFiles = await collectMarkdownFiles(adapter);
+
+  // Run content-based checks
+  const wikiLinksResult = await checkWikiLinks(adapter, mdFiles);
+  const dofResult = checkDof(mdFiles);
+  const helpersResult = checkHelpers(mdFiles);
+
+  return buildHealthReport(
+    [gitResult, autogitResult, skillsCountResult, wikiLinksResult, dofResult, helpersResult],
+    { startTime },
+  );
+}
