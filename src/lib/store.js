@@ -1,5 +1,9 @@
 import { writable, derived } from 'svelte/store';
 
+/**
+ * @typedef {'graph' | 'files' | 'git' | 'settings'} TabId
+ */
+
 function createStore() {
   const { subscribe, update, set } = writable({
     appName: 'FV Skills Command',
@@ -10,6 +14,8 @@ function createStore() {
     loading: false,
     typeFilters: new Set(),
     activeDofs: new Map(),
+    /** @type {TabId} */
+    activeTab: 'graph',
   });
 
   return {
@@ -58,6 +64,11 @@ function createStore() {
         }
         return { ...s, activeDofs: active };
       });
+    },
+
+    /** @param {TabId} tab */
+    setActiveTab(tab) {
+      update((s) => ({ ...s, activeTab: tab }));
     },
   };
 }
