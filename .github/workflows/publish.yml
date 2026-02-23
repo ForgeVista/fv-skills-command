@@ -36,21 +36,23 @@ jobs:
           cache: npm
 
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ contains(matrix.args, 'x86_64-apple-darwin') && 'x86_64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: ./src-tauri -> target
 
       - run: npm ci
-      - run: npm run build
 
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: app-v__VERSION__
           releaseName: FV Skills Command v__VERSION__
-          releaseBody: "See assets for .exe, .dmg, and .AppImage."
+          releaseBody: "See assets for .msi, .dmg, and .AppImage installers."
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: false
           args: ${{ matrix.args }}
