@@ -1,5 +1,5 @@
 <script>
-  import { onDestroy } from 'svelte';
+  import { onDestroy, beforeUpdate } from 'svelte';
   import { store } from '../lib/store.js';
   import { parseMarkdown } from '../../packages/core/parser.js';
   import { invoke } from '@tauri-apps/api/core';
@@ -21,22 +21,28 @@
   $: allSkills = $store.skills || [];
   $: storeSelectedId = $store.selectedSkillId;
 
-  // Intercept skill switch — check for unsaved changes
-  $: if (storeSelectedId !== activeId) {
-    if (isEditing && editContent !== (allSkills.find(s => s.id === activeId)?.body || '')) {
-      const discard = confirm('You have unsaved changes. Discard and switch?');
-      if (discard) {
-        isEditing = false;
-        saveError = '';
-        activeId = storeSelectedId;
+  // Intercept skill switch — check for unsaved changes (non-reactive to avoid cycle)
+  beforeUpdate(() => {
+    if (storeSelectedId !== activeId) {
+      if (isEditing && editContent !== (allSkills.find(s => s.id === activeId)?.body || '')) {
+        const discard = confirm('You have unsaved changes. Discard and switch?');
+        if (discard) {
+          isEditing = false;
+          saveError = '';
+          activeId = storeSelectedId;
+        } else {
+          store.selectSkill(activeId);
+        }
       } else {
-        store.selectSkill(activeId);
+        if (isEditing) isEditing = false;
+        activeId = storeSelectedId;
       }
-    } else {
-      if (isEditing) isEditing = false;
-      activeId = storeSelectedId;
     }
-  }
+    if (!isEditing) {
+      const body = (allSkills.find((s) => s.id === activeId))?.body || '';
+      if (editContent !== body) editContent = body;
+    }
+  });
 
   $: skill = allSkills.find((s) => s.id === activeId);
 
@@ -57,10 +63,6 @@
           renderedHtml = '<p class="empty-state">Unable to render markdown.</p>';
         });
     }
-  }
-
-  $: if (!isEditing) {
-    editContent = skill?.body || '';
   }
 
   function startEditing() {
