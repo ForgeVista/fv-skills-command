@@ -139,7 +139,7 @@
         <div class="tree-dir">
           <button class="tree-dir-header" on:click={() => toggleDir(dirPath)}>
             <span class="dir-chevron">{open ? '\u25BC' : '\u25B6'}</span>
-            <span class="dir-icon">\u{1F4C1}</span>
+            <span class="dir-icon">📁</span>
             <span class="dir-name">{dirName}</span>
             <span class="dir-count">{countFiles(dirNode)}</span>
           </button>
@@ -153,7 +153,7 @@
                 <div class="tree-dir">
                   <button class="tree-dir-header" on:click={() => toggleDir(subPath)}>
                     <span class="dir-chevron">{subOpen ? '\u25BC' : '\u25B6'}</span>
-                    <span class="dir-icon">\u{1F4C1}</span>
+                    <span class="dir-icon">📁</span>
                     <span class="dir-name">{subDirName}</span>
                     <span class="dir-count">{countFiles(subDirNode)}</span>
                   </button>
