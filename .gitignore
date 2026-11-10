@@ -49,3 +49,8 @@ tmp/
 *:Zone.Identifier
 [Dd]esktop.ini
 ._*
+
+# ---- Local-only working folder (git-prep guard) ----
+# z-other/ holds what stays on this machine and never reaches the remote. List its contents in
+# the repo-root SOURCES.md so a worker on another machine knows what exists here.
+z-other/
